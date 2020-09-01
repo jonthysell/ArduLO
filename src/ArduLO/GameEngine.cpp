@@ -28,7 +28,7 @@ void GameEngine::loadLevel(const int8_t level)
     m_level = max(level, 0) % LEVELCOUNT;
 
     m_lights = pgm_read_dword(LevelLights + m_level);
-    m_par = 16;
+    m_par = 6 + (m_level / 5);
 
     m_moves = 0;
 
