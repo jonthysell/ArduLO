@@ -25,7 +25,7 @@ GameEngine::GameEngine()
 
 void GameEngine::loadLevel(const int8_t level)
 {
-    m_level = max(level, 0) % LEVELCOUNT;
+    m_level = max(level, 0) % LevelCount;
 
     m_lights = pgm_read_dword(LevelLights + m_level);
     m_par = 6 + (m_level / 5);
@@ -37,9 +37,9 @@ void GameEngine::loadLevel(const int8_t level)
 
 bool GameEngine::getLight(const int8_t x, const int8_t y)
 {
-    if (x >= 0 && x < PUZZLESIZE && y >= 0 && y < PUZZLESIZE)
+    if (x >= 0 && x < PuzzleSize && y >= 0 && y < PuzzleSize)
     {
-        return bitRead(m_lights, y * PUZZLESIZE + x);
+        return bitRead(m_lights, y * PuzzleSize + x);
     }
 
     return false;
@@ -47,8 +47,8 @@ bool GameEngine::getLight(const int8_t x, const int8_t y)
 
 void GameEngine::selectLight(const int8_t x, const int8_t y)
 {
-    m_selectedX = max(0, min(x, PUZZLESIZE - 1));
-    m_selectedY = max(0, min(y, PUZZLESIZE - 1));
+    m_selectedX = max(0, min(x, PuzzleSize - 1));
+    m_selectedY = max(0, min(y, PuzzleSize - 1));
 }
 
 void GameEngine::toggleSelectedLight()
@@ -63,9 +63,9 @@ void GameEngine::toggleSelectedLight()
 
 bool GameEngine::isCompleted()
 {
-    for (uint8_t x = 0; x < PUZZLESIZE; x++)
+    for (uint8_t x = 0; x < PuzzleSize; x++)
     {
-        for (uint8_t y = 0; y < PUZZLESIZE; y++)
+        for (uint8_t y = 0; y < PuzzleSize; y++)
         {
             if (getLight(x, y))
             {
@@ -77,10 +77,24 @@ bool GameEngine::isCompleted()
     return true;
 }
 
+uint8_t GameEngine::getStars()
+{
+    if (m_moves <= m_par)
+    {
+        return MaxStars;
+    }
+    else if (m_moves <= (m_par + m_par / 2))
+    {
+        return AvgStars;
+    }
+
+    return MinStars;
+}
+
 void GameEngine::toggleLight(const int8_t x, const int8_t y)
 {
-    if (x >= 0 && x < PUZZLESIZE && y >= 0 && y < PUZZLESIZE)
+    if (x >= 0 && x < PuzzleSize && y >= 0 && y < PuzzleSize)
     {
-        bitToggle(m_lights, y * PUZZLESIZE + x);
+        bitToggle(m_lights, y * PuzzleSize + x);
     }
 }

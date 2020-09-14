@@ -4,7 +4,8 @@
 #ifndef SCENES_H
 #define SCENES_H
 
-enum SceneId : uint8_t {
+enum SceneId : uint8_t
+{
     Title,
     Game,
 };

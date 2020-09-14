@@ -6,9 +6,14 @@
 #ifndef GAMEENGINE_H
 #define GAMEENGINE_H
 
-#define PUZZLESIZE 5
+const int8_t PuzzleSize = 5;
+const int8_t LevelCount = 50;
 
-#define LEVELCOUNT 50
+const uint8_t MaxStars = 3;
+const uint8_t AvgStars = 2;
+const uint8_t MinStars = 1;
+
+const uint8_t PerfectScore = LevelCount * MaxStars;
 
 class GameEngine
 {
@@ -30,6 +35,8 @@ class GameEngine
         int8_t getLevel() { return m_level; }
         uint16_t getPar() { return m_par; }
         uint16_t getMoves() { return m_moves; }
+
+        uint8_t getStars();
     
     private:
         void toggleLight(const int8_t x, const int8_t y);

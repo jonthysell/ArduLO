@@ -7,17 +7,14 @@
 #include "Bitmaps.h"
 #include "Scenes.h"
 
-#define TitleTextSize 1
+const uint8_t TitleMargin = 4;
 
-#define TitleMargin 4
-
-#define TitleAnimationFrames (FRAMERATE * 2)
-#define TitleMaxFrames (FRAMERATE * 30)
+const uint16_t TitleAnimationFrames = FrameRate * 2;
+const uint16_t TitleMaxFrames = FrameRate * 30;
 
 void initTitle()
 {
     frameCount = 0;
-    arduboy.setTextSize(TitleTextSize);
 }
 
 SceneId updateTitle()
@@ -53,8 +50,8 @@ void drawTitle()
     {
         arduboy.setTextSize(1);
 
-        arduboy.setCursor((WIDTH - getTextWidth(14)) / 2, HEIGHT - (TitleMargin + getTextHeight()));
+        arduboy.setCursor((WIDTH - getTextWidth(StringLength(PressToStartString))) / 2, HEIGHT - (TitleMargin + getTextHeight()));
 
-        arduboy.println(F("PRESS TO START"));
+        arduboy.println(F(PressToStartString));
     }
 }

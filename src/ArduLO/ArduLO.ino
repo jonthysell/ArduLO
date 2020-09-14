@@ -9,7 +9,7 @@ SceneId currentScene;
 void setup()
 {
   arduboy.begin();
-  arduboy.setFrameRate(FRAMERATE);
+  arduboy.setFrameRate(FrameRate);
   arduboy.initRandomSeed();
 }
 
