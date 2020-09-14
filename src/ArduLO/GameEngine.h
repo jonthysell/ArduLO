@@ -2,12 +2,12 @@
 // Licensed under the MIT License.
 
 #include "Arduino.h"
+#include "Levels.h"
 
 #ifndef GAMEENGINE_H
 #define GAMEENGINE_H
 
 const int8_t PuzzleSize = 5;
-const int8_t LevelCount = 50;
 
 const uint8_t MaxStars = 3;
 const uint8_t AvgStars = 2;
@@ -27,7 +27,7 @@ class GameEngine
         void selectLight(const int8_t x, const int8_t y);
         void toggleSelectedLight();
 
-        bool isCompleted();
+        bool isCompleted() { return m_lights == 0; }
 
         int8_t getSelectedX() { return m_selectedX; }
         int8_t getSelectedY() { return m_selectedY; }
