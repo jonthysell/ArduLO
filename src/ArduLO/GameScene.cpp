@@ -26,6 +26,7 @@ const uint8_t TextPadding = 4;
 #define CompleteString "COMPLETE"
 #define PerfectString "PERFECT"
 #define ScoreString "SCORE"
+#define GameOverString "GAME OVER"
 
 #define PressAToContinueString "(A) - CONTINUE"
 #define PressBToRetryString "(B) - RETRY"
@@ -41,6 +42,7 @@ enum GameModeId : uint8_t {
     Play,
     Paused,
     LevelComplete,
+    GameComplete,
 };
 
 GameModeId currentGameModeId;
@@ -146,11 +148,13 @@ SceneId updateGame()
         {
             if (arduboy.justReleased(A_BUTTON))
             {
-                // Go to next level
-                frameCount = 0;
-                currentGameModeId = GameModeId::LoadLevel;
+                // Go to next level / endgame
                 score += game.getStars();
-                game.loadLevel(game.getLevel() + 1);
+                int8_t nextLevel = game.getLevel() + 1;
+
+                frameCount = 0;
+                currentGameModeId = nextLevel == LevelCount ? GameModeId::GameComplete : GameModeId::LoadLevel;
+                game.loadLevel(nextLevel);
                 return SceneId::Game;
             }
             
@@ -162,6 +166,15 @@ SceneId updateGame()
                 game.loadLevel(game.getLevel());
                 return SceneId::Game;
             }
+        }
+    }
+    else if (currentGameModeId == GameModeId::GameComplete)
+    {
+        if (arduboy.justReleased(A_BUTTON))
+        {
+            // Restart game
+            frameCount = 0;
+            return SceneId::Title;
         }
     }
 
@@ -234,7 +247,7 @@ void drawGame()
         arduboy.println(remainingMoves, 10);
 
         arduboy.setTextSize(1);
-        arduboy.setCursorX(WIDTH - (WIDTH / 4) - getTextWidth(StringLength(ScoreString) + StringLength(SpaceString) + (displayLevel >= 10 ? 2 : 1)) / 2);
+        arduboy.setCursorX(WIDTH - (WIDTH / 4) - getTextWidth(StringLength(ScoreString) + StringLength(SpaceString) + (score >= 100 ? 3 : (score >= 10 ? 2 : 1))) / 2);
         arduboy.setCursorY(arduboy.getCursorY() + TextPadding);
         arduboy.print(F(ScoreString));
         arduboy.print(F(SpaceString));
@@ -285,5 +298,30 @@ void drawGame()
         arduboy.setCursorX((WIDTH - getTextWidth(StringLength(PressBToRetryString))) / 2);
         arduboy.setCursorY(arduboy.getCursorY() + TextPadding);
         arduboy.println(F(PressBToRetryString));
+    }
+    else if (currentGameModeId == GameModeId::GameComplete)
+    {
+        uint8_t displayStars = score / LevelCount;
+
+        arduboy.setTextSize(2);
+        arduboy.setCursorX((WIDTH - getTextWidth(StringLength(GameOverString))) / 2);
+        arduboy.setCursorY((HEIGHT - (3 * CharPixelHeight + LightSize + 2 * TextPadding)) / 2);
+        arduboy.println(F(GameOverString));
+
+        const uint8_t px = (WIDTH - MaxStars * (LightSize + TextPadding) - TextPadding) / 2;
+        const uint8_t py = arduboy.getCursorY() + TextPadding;
+
+        for (uint8_t star = 0; star < MaxStars; star++)
+        {
+            arduboy.drawBitmap(px + star * (LightSize + TextPadding), py, star < displayStars ? LitBitmap : UnlitBitmap, LightSize, LightSize, WHITE);
+        }
+        arduboy.setCursorY(py + LightSize);
+
+        arduboy.setTextSize(1);
+        arduboy.setCursorX((WIDTH - getTextWidth(StringLength(ScoreString) + StringLength(SpaceString) + (score >= 100 ? 3 : (score >= 10 ? 2 : 1)))) / 2);
+        arduboy.setCursorY(arduboy.getCursorY() + TextPadding);
+        arduboy.print(F(ScoreString));
+        arduboy.print(F(SpaceString));
+        arduboy.println(score, 10);
     }
 }
