@@ -3,12 +3,14 @@
 
 #include <Arduboy2.h>
 
+#include <limits.h>
+
 #include "Common.h"
 #include "Bitmaps.h"
 #include "GameEngine.h"
 #include "Scenes.h"
 
-uint16_t LevelCompleteAnimationFrames = 0;
+const uint16_t LevelCompleteAnimationFrames = 0;
 
 const uint8_t PlayfieldMargin = 2;
 const uint8_t PlayfieldX = PlayfieldMargin;
@@ -59,126 +61,133 @@ SceneId updateGame()
 {
     arduboy.pollButtons();
 
-    if (currentGameModeId == GameModeId::LoadLevel)
+    // Disable input for a few frames for extra de-bounce
+    if (frameCount >= InputDisabledFrames)
     {
-        if (arduboy.justReleased(A_BUTTON))
-        {
-            // Animation end, go to game
-            frameCount = 0;
-            currentGameModeId = GameModeId::Play;
-            return SceneId::Game;
-        }
-    }
-    else if (currentGameModeId == GameModeId::Play)
-    {
-        if (game.isCompleted()) 
-        {
-            // Go to level complete
-            frameCount = 0;
-            currentGameModeId = GameModeId::LevelComplete;
-            return SceneId::Game;
-        }
-
-        if (arduboy.justReleased(A_BUTTON))
-        {
-            game.toggleSelectedLight();
-        }
-
-        if (arduboy.justReleased(B_BUTTON))
-        {
-            // Pause game
-            frameCount = 0;
-            currentGameModeId = GameModeId::Paused;
-            arduboy.setFrameRate(PausedFrameRate);
-            return SceneId::Game;
-        }
-
-        if (arduboy.justReleased(UP_BUTTON))
-        {
-            game.selectLight(game.getSelectedX(), game.getSelectedY() - 1);
-        }
-
-        if (arduboy.justReleased(DOWN_BUTTON))
-        {
-            game.selectLight(game.getSelectedX(), game.getSelectedY() + 1);
-        }
-
-        if (arduboy.justReleased(LEFT_BUTTON))
-        {
-            game.selectLight(game.getSelectedX() - 1, game.getSelectedY());
-        }
-
-        if (arduboy.justReleased(RIGHT_BUTTON))
-        {
-            game.selectLight(game.getSelectedX() + 1, game.getSelectedY());
-        }
-    }
-    else if (currentGameModeId == GameModeId::Paused)
-    {
-        if (arduboy.justReleased(A_BUTTON))
-        {
-            // Unpause game
-            frameCount = 0;
-            currentGameModeId = GameModeId::Play;
-            arduboy.setFrameRate(FrameRate);
-            return SceneId::Game;
-        }
-
-        if (arduboy.justReleased(B_BUTTON))
-        {
-            // Reset puzzle
-            frameCount = 0;
-            currentGameModeId = GameModeId::Play;
-            game.loadLevel(game.getLevel());
-            arduboy.setFrameRate(FrameRate);
-            return SceneId::Game;
-        }
-    }
-    else if (currentGameModeId == GameModeId::LevelComplete)
-    {
-        if (frameCount < LevelCompleteAnimationFrames)
-        {
-            if (arduboy.justReleased(A_BUTTON | B_BUTTON))
-            {
-                // Skip to animation end
-                frameCount = LevelCompleteAnimationFrames;
-            }
-        }
-        else
+        if (currentGameModeId == GameModeId::LoadLevel)
         {
             if (arduboy.justReleased(A_BUTTON))
             {
-                // Go to next level / endgame
-                score += game.getStars();
-                int8_t nextLevel = game.getLevel() + 1;
-
+                // Animation end, go to game
                 frameCount = 0;
-                currentGameModeId = nextLevel == LevelCount ? GameModeId::GameComplete : GameModeId::LoadLevel;
-                game.loadLevel(nextLevel);
+                currentGameModeId = GameModeId::Play;
                 return SceneId::Game;
             }
-            
-            if (arduboy.justReleased(B_BUTTON))
+        }
+        else if (currentGameModeId == GameModeId::Play)
+        {
+            if (game.isCompleted()) 
             {
-                // Retry level
+                // Go to level complete
                 frameCount = 0;
-                currentGameModeId = GameModeId::LoadLevel;
+                currentGameModeId = GameModeId::LevelComplete;
+                return SceneId::Game;
+            }
+
+            // Check up-down directionals
+            if (arduboy.pressed(UP_BUTTON))
+            {
+                frameCount = 0;
+                game.selectLight(game.getSelectedX(), game.getSelectedY() - 1);
+            }
+            else if (arduboy.pressed(DOWN_BUTTON))
+            {
+                frameCount = 0;
+                game.selectLight(game.getSelectedX(), game.getSelectedY() + 1);
+            }
+
+            // Check left-right directionals
+            if (arduboy.pressed(LEFT_BUTTON))
+            {
+                frameCount = 0;
+                game.selectLight(game.getSelectedX() - 1, game.getSelectedY());
+            }
+            else if (arduboy.pressed(RIGHT_BUTTON))
+            {
+                frameCount = 0;
+                game.selectLight(game.getSelectedX() + 1, game.getSelectedY());
+            }
+
+            // Check buttons
+            if (arduboy.justReleased(A_BUTTON))
+            {
+                frameCount = 0;
+                game.toggleSelectedLight();
+            }
+            else if (arduboy.justReleased(B_BUTTON))
+            {
+                // Pause game
+                frameCount = 0;
+                currentGameModeId = GameModeId::Paused;
+                return SceneId::Game;
+            }
+        }
+        else if (currentGameModeId == GameModeId::Paused)
+        {
+            // Check buttons
+            if (arduboy.justReleased(A_BUTTON))
+            {
+                // Unpause game
+                frameCount = 0;
+                currentGameModeId = GameModeId::Play;
+                return SceneId::Game;
+            }
+            else if (arduboy.justReleased(B_BUTTON))
+            {
+                // Reset puzzle
+                frameCount = 0;
+                currentGameModeId = GameModeId::Play;
                 game.loadLevel(game.getLevel());
                 return SceneId::Game;
             }
         }
-    }
-    else if (currentGameModeId == GameModeId::GameComplete)
-    {
-        if (arduboy.justReleased(A_BUTTON))
+        else if (currentGameModeId == GameModeId::LevelComplete)
         {
-            // Restart game
-            frameCount = 0;
-            return SceneId::Title;
+            if (frameCount < LevelCompleteAnimationFrames)
+            {
+                if (arduboy.justReleased(A_BUTTON | B_BUTTON))
+                {
+                    // Skip to animation end
+                    frameCount = LevelCompleteAnimationFrames;
+                }
+            }
+            else
+            {
+                // Check buttons
+                if (arduboy.justReleased(A_BUTTON))
+                {
+                    // Go to next level / endgame
+                    score += game.getStars();
+                    int8_t nextLevel = game.getLevel() + 1;
+
+                    frameCount = 0;
+                    currentGameModeId = nextLevel == LevelCount ? GameModeId::GameComplete : GameModeId::LoadLevel;
+                    game.loadLevel(nextLevel);
+                    return SceneId::Game;
+                }
+                else if (arduboy.justReleased(B_BUTTON))
+                {
+                    // Retry level
+                    frameCount = 0;
+                    currentGameModeId = GameModeId::LoadLevel;
+                    game.loadLevel(game.getLevel());
+                    return SceneId::Game;
+                }
+            }
+        }
+        else if (currentGameModeId == GameModeId::GameComplete)
+        {
+            // Check buttons
+            if (arduboy.justReleased(A_BUTTON))
+            {
+                // Restart game
+                frameCount = 0;
+                return SceneId::Title;
+            }
         }
     }
 
-    frameCount++;
+    frameCount = frameCount == USHRT_MAX ? InputDisabledFrames : frameCount + 1;
 
     return SceneId::Game;
 }

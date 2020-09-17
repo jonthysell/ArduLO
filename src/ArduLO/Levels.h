@@ -8,8 +8,6 @@
 
 const int8_t LevelCount = 50;
 
-#define boundLevel(x) (max(x, 0) % LevelCount)
-
 const uint32_t LevelLights[] PROGMEM = {
     0x0005400UL,
     0x15A82B5UL,
@@ -62,6 +60,11 @@ const uint32_t LevelLights[] PROGMEM = {
     0x1151151UL,
     0x1FFFFFFUL,
 };
+
+static int8_t boundLevel(const int8_t level)
+{
+    return max(level, 0) % LevelCount;
+}
 
 static uint32_t getLightsForLevel(const int8_t level)
 {

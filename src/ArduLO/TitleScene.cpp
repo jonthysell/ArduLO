@@ -7,10 +7,10 @@
 #include "Bitmaps.h"
 #include "Scenes.h"
 
-const uint8_t TitleMargin = 4;
+const int16_t TitleMargin = 4;
 
 const uint16_t TitleAnimationFrames = FrameRate * 2;
-const uint16_t TitleMaxFrames = FrameRate * 30;
+const uint16_t TitleMaxFrames = FrameRate * 15;
 
 void initTitle()
 {
@@ -20,18 +20,22 @@ void initTitle()
 SceneId updateTitle()
 {
     arduboy.pollButtons();
-    
-    if (arduboy.justReleased(A_BUTTON | B_BUTTON))
+
+    // Disable input for a few frames for extra de-bounce
+    if (frameCount >= InputDisabledFrames)
     {
-        if (frameCount < TitleAnimationFrames)
+        if (arduboy.justReleased(A_BUTTON))
         {
-            // Skip to animation end
-            frameCount = TitleAnimationFrames;
-        }
-        else
-        {
-            // Start Game
-            return SceneId::Game;
+            if (frameCount < TitleAnimationFrames)
+            {
+                // Skip to animation end
+                frameCount = TitleAnimationFrames;
+            }
+            else
+            {
+                // Start Game
+                return SceneId::Game;
+            }
         }
     }
 
@@ -44,14 +48,16 @@ void drawTitle()
 {
     arduboy.clear();
 
-    arduboy.drawBitmap(TitleMargin, TitleMargin - (TitleAnimationFrames - min(frameCount, TitleAnimationFrames)), TitleBitmap, TitleBitmapWidth, TitleBitmapHeight, WHITE);
+    const int16_t titleX = TitleMargin;
+    const int16_t titleY = (int16_t)boundedMap(frameCount, 0, TitleAnimationFrames, -TitleBitmapHeight, TitleMargin);
+
+    arduboy.drawBitmap(titleX, titleY, TitleBitmap, TitleBitmapWidth, TitleBitmapHeight, WHITE);
 
     if (frameCount > TitleAnimationFrames && blinkOneSecond)
     {
         arduboy.setTextSize(1);
-
-        arduboy.setCursor((WIDTH - getTextWidth(StringLength(PressToStartString))) / 2, HEIGHT - (TitleMargin + getTextHeight()));
-
+        arduboy.setCursorX((WIDTH - getTextWidth(StringLength(PressToStartString))) / 2);
+        arduboy.setCursorY(HEIGHT - (TitleMargin + getTextHeight()));
         arduboy.println(F(PressToStartString));
     }
 }
