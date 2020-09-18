@@ -20,7 +20,7 @@ class GameEngine
     public:
         GameEngine();
 
-        void loadLevel(const int8_t level);
+        void loadLevel(const int8_t level, const bool setB);
 
         bool getLight(const int8_t x, const int8_t y);
 

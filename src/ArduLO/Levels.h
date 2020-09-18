@@ -8,7 +8,7 @@
 
 const int8_t LevelCount = 50;
 
-const uint32_t LevelLights[] PROGMEM = {
+const uint32_t LevelLightsA[] PROGMEM = {
     0x0005400UL,
     0x15A82B5UL,
     0x0ADEF6AUL,
@@ -61,14 +61,67 @@ const uint32_t LevelLights[] PROGMEM = {
     0x1FFFFFFUL,
 };
 
+const uint32_t LevelLightsB[] PROGMEM = {
+    0x1B06C1BUL,
+    0x1F2009FUL,
+    0x1F5115FUL,
+    0x11D822AUL,
+    0x0466CC4UL,
+    0x0AFD7EAUL,
+    0x158EE35UL,
+    0x0013800UL,
+    0x0531110UL,
+    0x11AC6A0UL,
+    0x1F739DFUL,
+    0x1150151UL,
+    0x0E4394EUL,
+    0x093BD2FUL,
+    0x0EAD6B5UL,
+    0x0E4384EUL,
+    0x1F8D63FUL,
+    0x1505415UL,
+    0x0AABAAAUL,
+    0x1500015UL,
+    0x1FBEFBFUL,
+    0x118FC9FUL,
+    0x1B56D5BUL,
+    0x1F8FD44UL,
+    0x118D771UL,
+    0x1FAFEBFUL,
+    0x0E2108EUL,
+    0x1B77D4EUL,
+    0x0001000UL,
+    0x1101011UL,
+    0x1BD837BUL,
+    0x047440AUL,
+    0x1576DD5UL,
+    0x11CD671UL,
+    0x15AEEB5UL,
+    0x15AB884UL,
+    0x1FAD6B5UL,
+    0x00739C0UL,
+    0x11FC544UL,
+    0x1555555UL,
+    0x11729D1UL,
+    0x0454544UL,
+    0x1502815UL,
+    0x0AFABEAUL,
+    0x1FEFEBFUL,
+    0x1151151UL,
+    0x1F27C9FUL,
+    0x1F711DFUL,
+    0x04AFEA4UL,
+    0x1FFFFFFUL,
+};
+
 static int8_t boundLevel(const int8_t level)
 {
     return max(level, 0) % LevelCount;
 }
 
-static uint32_t getLightsForLevel(const int8_t level)
+static uint32_t getLightsForLevel(const int8_t level, const bool setB)
 {
-    return pgm_read_dword(LevelLights + boundLevel(level));
+    return pgm_read_dword((setB ? LevelLightsB : LevelLightsA) + boundLevel(level));
 }
 
 static uint16_t getParForLevel(const int8_t level)

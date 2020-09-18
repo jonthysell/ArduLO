@@ -34,6 +34,7 @@ SceneId updateTitle()
             else
             {
                 // Start Game
+                useSetB = arduboy.pressed(B_BUTTON);
                 return SceneId::Game;
             }
         }

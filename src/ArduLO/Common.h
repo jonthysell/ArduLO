@@ -16,6 +16,7 @@ const uint8_t CharPixelWidth = 6;
 extern Arduboy2 arduboy;
 
 extern uint16_t frameCount;
+extern bool useSetB;
 
 #define blinkOneSecond ((frameCount / FrameRate) % 2 == 0)
 

@@ -23,6 +23,8 @@ const uint8_t LightPadding = 3;
 const uint8_t TextPadding = 4;
 
 #define LevelString "LEVEL"
+#define AString "A"
+#define BString "B"
 #define MinMovesString "MIN MOVES"
 #define PausedString "PAUSED"
 #define CompleteString "COMPLETE"
@@ -38,6 +40,7 @@ extern Arduboy2 arduboy;
 GameEngine game;
 
 uint16_t score;
+bool useSetB;
 
 enum GameModeId : uint8_t {
     LoadLevel,
@@ -53,7 +56,7 @@ void initGame()
 {
     frameCount = 0;
     currentGameModeId = GameModeId::LoadLevel;
-    game.loadLevel(0);
+    game.loadLevel(0, useSetB);
     score = 0;
 }
 
@@ -137,7 +140,7 @@ SceneId updateGame()
                 // Reset puzzle
                 frameCount = 0;
                 currentGameModeId = GameModeId::Play;
-                game.loadLevel(game.getLevel());
+                game.loadLevel(game.getLevel(), useSetB);
                 return SceneId::Game;
             }
         }
@@ -162,7 +165,7 @@ SceneId updateGame()
 
                     frameCount = 0;
                     currentGameModeId = nextLevel == LevelCount ? GameModeId::GameComplete : GameModeId::LoadLevel;
-                    game.loadLevel(nextLevel);
+                    game.loadLevel(nextLevel, useSetB);
                     return SceneId::Game;
                 }
                 else if (arduboy.justReleased(B_BUTTON))
@@ -170,7 +173,7 @@ SceneId updateGame()
                     // Retry level
                     frameCount = 0;
                     currentGameModeId = GameModeId::LoadLevel;
-                    game.loadLevel(game.getLevel());
+                    game.loadLevel(game.getLevel(), useSetB);
                     return SceneId::Game;
                 }
             }
@@ -201,10 +204,11 @@ void drawGame()
     if (currentGameModeId == GameModeId::LoadLevel)
     {
         arduboy.setTextSize(2);
-        arduboy.setCursorX((WIDTH - getTextWidth(StringLength(LevelString) + StringLength(SpaceString) + (displayLevel >= 10 ? 2 : 1))) / 2);
+        arduboy.setCursorX((WIDTH - getTextWidth(StringLength(LevelString) + StringLength(SpaceString) + (useSetB ? StringLength(BString) : StringLength(AString)) + (displayLevel >= 10 ? 2 : 1))) / 2);
         arduboy.setCursorY((HEIGHT - (4 * CharPixelHeight + 2 * TextPadding)) / 2);
         arduboy.print(F(LevelString));
         arduboy.print(F(SpaceString));
+        arduboy.print(useSetB ? F(BString) : F(AString));
         arduboy.println(displayLevel, 10);
 
         uint16_t displayPar = game.getPar();
@@ -242,10 +246,11 @@ void drawGame()
         }
 
         arduboy.setTextSize(1);
-        arduboy.setCursorX(WIDTH - (WIDTH / 4) - getTextWidth(StringLength(LevelString) + StringLength(SpaceString) + (displayLevel >= 10 ? 2 : 1)) / 2);
+        arduboy.setCursorX(WIDTH - (WIDTH / 4) - getTextWidth(StringLength(LevelString) + StringLength(SpaceString) + (useSetB ? StringLength(BString) : StringLength(AString)) + (displayLevel >= 10 ? 2 : 1)) / 2);
         arduboy.setCursorY((HEIGHT - (4 * CharPixelHeight + 2 * TextPadding)) / 2);
         arduboy.print(F(LevelString));
         arduboy.print(F(SpaceString));
+        arduboy.print(useSetB ? F(BString) : F(AString));
         arduboy.println(displayLevel, 10);
 
         uint16_t remainingMoves = game.getPar() - min(game.getPar(), game.getMoves());
@@ -283,10 +288,11 @@ void drawGame()
         uint8_t displayStars = game.getStars();
 
         arduboy.setTextSize(1);
-        arduboy.setCursorX((WIDTH - getTextWidth(StringLength(LevelString) + StringLength(SpaceString) + (displayLevel >= 10 ? 2 : 1) + StringLength(SpaceString) + (displayStars >= MaxStars ? StringLength(PerfectString) : StringLength(CompleteString)))) / 2);
+        arduboy.setCursorX((WIDTH - getTextWidth(StringLength(LevelString) + StringLength(SpaceString) + (useSetB ? StringLength(BString) : StringLength(AString)) + (displayLevel >= 10 ? 2 : 1) + StringLength(SpaceString) + (displayStars >= MaxStars ? StringLength(PerfectString) : StringLength(CompleteString)))) / 2);
         arduboy.setCursorY((HEIGHT - (3 * CharPixelHeight + LightSize + 3 * TextPadding)) / 2);
         arduboy.print(F(LevelString));
         arduboy.print(F(SpaceString));
+        arduboy.print(useSetB ? F(BString) : F(AString));
         arduboy.print(displayLevel, 10);
         arduboy.print(F(SpaceString));
         arduboy.println(displayStars >= MaxStars ? F(PerfectString) : F(CompleteString));

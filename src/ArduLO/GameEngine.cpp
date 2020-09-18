@@ -5,14 +5,13 @@
 
 GameEngine::GameEngine()
 {
-    loadLevel(0);
 }
 
-void GameEngine::loadLevel(const int8_t level)
+void GameEngine::loadLevel(const int8_t level, const bool setB)
 {
     m_level = boundLevel(level);
 
-    m_lights = getLightsForLevel(m_level);
+    m_lights = getLightsForLevel(m_level, setB);
     m_par = getParForLevel(m_level);
 
     m_moves = 0;
