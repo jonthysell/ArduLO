@@ -10,10 +10,10 @@
 const int8_t PuzzleSize = 5;
 
 const uint8_t MaxStars = 3;
-const uint8_t AvgStars = 2;
-const uint8_t MinStars = 1;
+const uint8_t MaxHalfStars = 6;
+const uint8_t MinHalfStars = 1;
 
-const uint8_t PerfectScore = LevelCount * MaxStars;
+const uint16_t PerfectScore = LevelCount * MaxHalfStars;
 
 class GameEngine
 {
@@ -36,7 +36,7 @@ class GameEngine
         uint16_t getPar() { return m_par; }
         uint16_t getMoves() { return m_moves; }
 
-        uint8_t getStars();
+        uint8_t getHalfStars();
     
     private:
         void toggleLight(const int8_t x, const int8_t y);
