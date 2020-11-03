@@ -6,9 +6,9 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-const uint8_t FrameRate = 15;
+const uint8_t FrameRate = 30;
 
-const uint16_t InputDisabledFrames = FrameRate / 4;
+const uint16_t InputDisabledFrames = FrameRate / 5;
 
 const uint8_t CharPixelHeight = 8;
 const uint8_t CharPixelWidth = 6;

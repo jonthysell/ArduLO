@@ -9,7 +9,7 @@
 
 const int16_t TitleMargin = 4;
 
-const uint16_t TitleAnimationFrames = FrameRate * 2;
+const uint16_t TitleAnimationFrames = FrameRate;
 const uint16_t TitleMaxFrames = FrameRate * 15;
 
 void initTitle()
