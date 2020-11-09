@@ -20,7 +20,6 @@ extern bool useSetB;
 
 #define blinkOneSecond ((frameCount / FrameRate) % 2 == 0)
 
-#define PressToStartString "PRESS A TO START"
 #define SpaceString " "
 #define StringLength(STR) (sizeof(STR) - 1)
 

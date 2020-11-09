@@ -7,10 +7,12 @@
 #include "Bitmaps.h"
 #include "Scenes.h"
 
-const int16_t TitleMargin = 4;
+const int16_t TitleMargin = (WIDTH - TitleBitmapWidth) / 2;
 
 const uint16_t TitleAnimationFrames = FrameRate;
 const uint16_t TitleMaxFrames = FrameRate * 15;
+
+const int16_t PressAToStartMargin = (WIDTH - PressAToStartBitmapWidth) / 2;
 
 void initTitle()
 {
@@ -56,9 +58,6 @@ void drawTitle()
 
     if (frameCount > TitleAnimationFrames && blinkOneSecond)
     {
-        arduboy.setTextSize(1);
-        arduboy.setCursorX((WIDTH - getTextWidth(StringLength(PressToStartString))) / 2);
-        arduboy.setCursorY(HEIGHT - (TitleMargin + getTextHeight()));
-        arduboy.println(F(PressToStartString));
+        arduboy.drawBitmap(PressAToStartMargin, HEIGHT - PressAToStartBitmapHeight - PressAToStartMargin, PressAToStartBitmap, PressAToStartBitmapWidth, PressAToStartBitmapHeight, WHITE);
     }
 }
