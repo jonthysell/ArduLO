@@ -4,6 +4,7 @@
 #include <Arduboy2.h>
 
 #include "Common.h"
+
 #include "Bitmaps.h"
 #include "Scenes.h"
 
@@ -58,6 +59,7 @@ void drawTitle()
 
     if (frameCount > TitleAnimationFrames && blinkOneSecond)
     {
-        arduboy.drawBitmap(PressAToStartMargin, HEIGHT - PressAToStartBitmapHeight - PressAToStartMargin, PressAToStartBitmap, PressAToStartBitmapWidth, PressAToStartBitmapHeight, WHITE);
+        arduboy.drawBitmap(PressAToStartMargin, HEIGHT - PressAToStartBitmapHeight - PressAToStartMargin,
+                           PressAToStartBitmap, PressAToStartBitmapWidth, PressAToStartBitmapHeight, WHITE);
     }
 }

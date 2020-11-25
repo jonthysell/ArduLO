@@ -40,7 +40,7 @@ void GameEngine::toggleSelectedLight()
     toggleLight(m_selectedX, m_selectedY);
     toggleLight(m_selectedX + 1, m_selectedY);
     toggleLight(m_selectedX, m_selectedY + 1);
-    toggleLight(m_selectedX -1 , m_selectedY);
+    toggleLight(m_selectedX - 1, m_selectedY);
     toggleLight(m_selectedX, m_selectedY - 1);
     m_moves++;
 }
