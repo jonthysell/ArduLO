@@ -17,9 +17,9 @@ Then, within the Arduino IDE, open src/ArduLO/ArduLO.ino, and run Sketch > Verif
 
 The objective is to turn off all of the lights in as few moves as possible. Toggling a light will cause the lights directly connected to also toggle, in the shape of a plus.
 
-Use the D-Pad to select the light you want to toggle, and press A to toggle the light. Press B to pause.
+Use the D-Pad to select the light you want to toggle, and press B to toggle the light. Press A to pause.
 
-There are two sets of 50 puzzles each. Press A at the title screen to start Set A, hold B while pressing A to start Set B.
+There are two sets of 50 puzzles each. Select either "Set A" or "Set B" at the title screen.
 
 ## Errata ##
 

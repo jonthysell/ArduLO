@@ -41,8 +41,8 @@ const uint8_t *HalfStarMap[][3] = {
 #define SlashString "/"
 #define GameOverString "GAME OVER"
 
-#define PressAToContinueString "(A) - CONTINUE"
-#define PressBToRetryString "(B) - RETRY"
+#define PressAToContinueString "(B) - CONTINUE"
+#define PressBToRetryString "(A) - RETRY"
 
 extern Arduboy2 arduboy;
 
@@ -79,7 +79,7 @@ SceneId updateGame()
     {
         if (currentGameModeId == GameModeId::LoadLevel)
         {
-            if (arduboy.justReleased(A_BUTTON))
+            if (arduboy.justReleased(B_BUTTON))
             {
                 // Animation end, go to game
                 frameCount = 0;
@@ -122,12 +122,12 @@ SceneId updateGame()
             }
 
             // Check buttons
-            if (arduboy.justReleased(A_BUTTON))
+            if (arduboy.justReleased(B_BUTTON))
             {
                 frameCount = 0;
                 game.toggleSelectedLight();
             }
-            else if (arduboy.justReleased(B_BUTTON))
+            else if (arduboy.justReleased(A_BUTTON))
             {
                 // Pause game
                 frameCount = 0;
@@ -138,14 +138,14 @@ SceneId updateGame()
         else if (currentGameModeId == GameModeId::Paused)
         {
             // Check buttons
-            if (arduboy.justReleased(A_BUTTON))
+            if (arduboy.justReleased(B_BUTTON))
             {
                 // Unpause game
                 frameCount = 0;
                 currentGameModeId = GameModeId::Play;
                 return SceneId::Game;
             }
-            else if (arduboy.justReleased(B_BUTTON))
+            else if (arduboy.justReleased(A_BUTTON))
             {
                 // Reset puzzle
                 frameCount = 0;
@@ -167,7 +167,7 @@ SceneId updateGame()
             else
             {
                 // Check buttons
-                if (arduboy.justReleased(A_BUTTON))
+                if (arduboy.justReleased(B_BUTTON))
                 {
                     // Go to next level / endgame
                     score += game.getHalfStars();
@@ -178,7 +178,7 @@ SceneId updateGame()
                     game.loadLevel(nextLevel, useSetB);
                     return SceneId::Game;
                 }
-                else if (arduboy.justReleased(B_BUTTON))
+                else if (arduboy.justReleased(A_BUTTON))
                 {
                     // Retry level
                     frameCount = 0;
@@ -191,7 +191,7 @@ SceneId updateGame()
         else if (currentGameModeId == GameModeId::GameComplete)
         {
             // Check buttons
-            if (arduboy.justReleased(A_BUTTON))
+            if (arduboy.justReleased(B_BUTTON))
             {
                 // Restart game
                 frameCount = 0;
