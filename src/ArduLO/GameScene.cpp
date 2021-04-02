@@ -44,12 +44,19 @@ const uint8_t *HalfStarMap[][3] = {
 #define PressAToContinueString "(B) - CONTINUE"
 #define PressBToRetryString "(A) - RETRY"
 
+const int16_t PausedMargin = (WIDTH - PausedBitmapWidth) / 2;
+
+const int16_t PausedButtonsXMargin = (WIDTH - ResumeBitmapWidth - RetryBitmapWidth) / 3;
+const int16_t PausedButtonsYMargin = (HEIGHT - PausedBitmapHeight - PausedMargin - PausedMargin - ResumeBitmapHeight) / 2;
+
 extern Arduboy2 arduboy;
 
 GameEngine game;
 
 uint16_t score;
 bool useSetB;
+
+bool highlightRight = false;
 
 enum GameModeId : uint8_t
 {
@@ -131,6 +138,7 @@ SceneId updateGame()
             {
                 // Pause game
                 frameCount = 0;
+                highlightRight = false;
                 currentGameModeId = GameModeId::Paused;
                 return SceneId::Game;
             }
@@ -138,20 +146,40 @@ SceneId updateGame()
         else if (currentGameModeId == GameModeId::Paused)
         {
             // Check buttons
-            if (arduboy.justReleased(B_BUTTON))
+            if (arduboy.justReleased(LEFT_BUTTON))
+            {
+                highlightRight = false;
+            }
+            else if (arduboy.justReleased(RIGHT_BUTTON))
+            {
+                highlightRight = true;
+            }
+
+            if (arduboy.justReleased(A_BUTTON))
             {
                 // Unpause game
                 frameCount = 0;
                 currentGameModeId = GameModeId::Play;
                 return SceneId::Game;
             }
-            else if (arduboy.justReleased(A_BUTTON))
+            else if (arduboy.justReleased(B_BUTTON))
             {
-                // Reset puzzle
-                frameCount = 0;
-                currentGameModeId = GameModeId::Play;
-                game.loadLevel(game.getLevel(), useSetB);
-                return SceneId::Game;
+                if (highlightRight)
+                {
+                    // Reset puzzle
+                    frameCount = 0;
+                    currentGameModeId = GameModeId::Play;
+                    game.loadLevel(game.getLevel(), useSetB);
+                    return SceneId::Game;
+                }
+                else
+                {
+                    // Unpause game
+                    frameCount = 0;
+                    currentGameModeId = GameModeId::Play;
+                    return SceneId::Game;
+                }
+                
             }
         }
         else if (currentGameModeId == GameModeId::LevelComplete)
@@ -292,19 +320,21 @@ void drawGame()
     }
     else if (currentGameModeId == GameModeId::Paused)
     {
-        arduboy.setTextSize(2);
-        arduboy.setCursorX((WIDTH - getTextWidth(StringLength(PausedString))) / 2);
-        arduboy.setCursorY((HEIGHT - (4 * CharPixelHeight + 2 * TextPadding)) / 2);
-        arduboy.println(F(PausedString));
+        const uint16_t pausedX = (WIDTH - PausedBitmapWidth) / 2;
+        const uint16_t pausedY = PausedMargin;
+        arduboy.drawBitmap(pausedX, pausedY, PausedBitmap, PausedBitmapWidth, PausedBitmapHeight, WHITE);
 
-        arduboy.setTextSize(1);
-        arduboy.setCursorX((WIDTH - getTextWidth(StringLength(PressAToContinueString))) / 2);
-        arduboy.setCursorY(arduboy.getCursorY() + TextPadding);
-        arduboy.println(F(PressAToContinueString));
+        const int16_t buttonY = (pausedY + PausedBitmapHeight + PausedMargin) + PausedButtonsYMargin;
 
-        arduboy.setCursorX((WIDTH - getTextWidth(StringLength(PressBToRetryString))) / 2);
-        arduboy.setCursorY(arduboy.getCursorY() + TextPadding);
-        arduboy.println(F(PressBToRetryString));
+        const int16_t resumeButtonX = PausedButtonsXMargin;
+        arduboy.drawBitmap(resumeButtonX, buttonY, ResumeBitmap, ResumeBitmapWidth, ResumeBitmapHeight, WHITE);
+
+        const int16_t retryButtonX = PausedButtonsXMargin + ResumeBitmapWidth + PausedButtonsXMargin;
+        arduboy.drawBitmap(retryButtonX, buttonY, RetryBitmap, RetryBitmapWidth, RetryBitmapHeight, WHITE);
+
+        const int16_t highlightX = (highlightRight ? retryButtonX : resumeButtonX) - 2;
+        const int16_t highlightY = buttonY - 2;
+        arduboy.drawRoundRect(highlightX, highlightY, (highlightRight ? RetryBitmapWidth : ResumeBitmapWidth) + 4, (highlightRight ? RetryBitmapHeight : ResumeBitmapHeight) + 4, 1, WHITE);
     }
     else if (currentGameModeId == GameModeId::LevelComplete)
     {
