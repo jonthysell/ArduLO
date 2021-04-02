@@ -13,7 +13,8 @@ const int16_t TitleMargin = (WIDTH - TitleBitmapWidth) / 2;
 const uint16_t TitleAnimationFrames = FrameRate;
 const uint16_t TitleMaxFrames = FrameRate * 15;
 
-const int16_t PressAToStartMargin = (WIDTH - PressAToStartBitmapWidth) / 2;
+const int16_t SetXMargin = (WIDTH - SetABitmapWidth - SetBBitmapWidth) / 3;
+const int16_t SetYMargin = (HEIGHT - TitleBitmapHeight - TitleMargin - TitleMargin - SetABitmapHeight) / 2;
 
 void initTitle()
 {
@@ -27,7 +28,16 @@ SceneId updateTitle()
     // Disable input for a few frames for extra de-bounce
     if (frameCount >= InputDisabledFrames)
     {
-        if (arduboy.justReleased(A_BUTTON))
+        if (arduboy.justReleased(LEFT_BUTTON))
+        {
+            useSetB = false;
+        }
+        else if (arduboy.justReleased(RIGHT_BUTTON))
+        {
+            useSetB = true;
+        }
+
+        if (arduboy.justReleased(B_BUTTON))
         {
             if (frameCount < TitleAnimationFrames)
             {
@@ -37,7 +47,6 @@ SceneId updateTitle()
             else
             {
                 // Start Game
-                useSetB = arduboy.pressed(B_BUTTON);
                 return SceneId::Game;
             }
         }
@@ -57,9 +66,18 @@ void drawTitle()
 
     arduboy.drawBitmap(titleX, titleY, TitleBitmap, TitleBitmapWidth, TitleBitmapHeight, WHITE);
 
-    if (frameCount > TitleAnimationFrames && blinkOneSecond)
+    if (frameCount > TitleAnimationFrames)
     {
-        arduboy.drawBitmap(PressAToStartMargin, HEIGHT - PressAToStartBitmapHeight - PressAToStartMargin,
-                           PressAToStartBitmap, PressAToStartBitmapWidth, PressAToStartBitmapHeight, WHITE);
+        const int16_t setY = (titleY + TitleBitmapHeight + TitleMargin) + SetYMargin;
+
+        const int16_t setAX = SetXMargin;
+        arduboy.drawBitmap(setAX, setY, SetABitmap, SetABitmapWidth, SetABitmapHeight, WHITE);
+
+        const int16_t setBX = SetXMargin + SetABitmapWidth + SetXMargin;
+        arduboy.drawBitmap(setBX, setY, SetBBitmap, SetBBitmapWidth, SetBBitmapHeight, WHITE);
+
+        const int16_t highlightX = (useSetB ? setBX : setAX) - 2;
+        const int16_t highlightY = setY - 2;
+        arduboy.drawRoundRect(highlightX, highlightY, SetABitmapWidth + 4, SetABitmapHeight + 4, 1, WHITE);
     }
 }
