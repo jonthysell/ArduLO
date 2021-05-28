@@ -30,25 +30,6 @@ const uint8_t *HalfStarMap[][3] = {
     {StarBitmap2, StarBitmap2, StarBitmap2},
 };
 
-#define LevelString "LEVEL"
-#define AString "A"
-#define BString "B"
-#define MinMovesString "MIN MOVES"
-#define PausedString "PAUSED"
-#define CompleteString "COMPLETE"
-#define PerfectString "PERFECT"
-#define ScoreString "SCORE"
-#define SlashString "/"
-#define GameOverString "GAME OVER"
-
-#define PressAToContinueString "(B) - CONTINUE"
-#define PressBToRetryString "(A) - RETRY"
-
-const int16_t PausedMargin = (WIDTH - PausedBitmapWidth) / 2;
-
-const int16_t PausedButtonsXMargin = (WIDTH - ResumeBitmapWidth - RetryBitmapWidth) / 3;
-const int16_t PausedButtonsYMargin = (HEIGHT - PausedBitmapHeight - PausedMargin - PausedMargin - ResumeBitmapHeight) / 2;
-
 extern Arduboy2 arduboy;
 
 GameEngine game;
@@ -60,7 +41,6 @@ bool highlightRight = false;
 
 enum GameModeId : uint8_t
 {
-    LoadLevel,
     Play,
     Paused,
     LevelComplete,
@@ -72,7 +52,7 @@ GameModeId currentGameModeId;
 void initGame()
 {
     frameCount = 0;
-    currentGameModeId = GameModeId::LoadLevel;
+    currentGameModeId = GameModeId::Play;
     game.loadLevel(0, useSetB);
     score = 0;
 }
@@ -84,22 +64,13 @@ SceneId updateGame()
     // Disable input for a few frames for extra de-bounce
     if (frameCount >= InputDisabledFrames)
     {
-        if (currentGameModeId == GameModeId::LoadLevel)
-        {
-            if (arduboy.justReleased(B_BUTTON))
-            {
-                // Animation end, go to game
-                frameCount = 0;
-                currentGameModeId = GameModeId::Play;
-                return SceneId::Game;
-            }
-        }
-        else if (currentGameModeId == GameModeId::Play)
+        if (currentGameModeId == GameModeId::Play)
         {
             if (game.isCompleted())
             {
                 // Go to level complete
                 frameCount = 0;
+                highlightRight = false;
                 currentGameModeId = GameModeId::LevelComplete;
                 return SceneId::Game;
             }
@@ -148,10 +119,12 @@ SceneId updateGame()
             // Check buttons
             if (arduboy.justReleased(LEFT_BUTTON))
             {
+                frameCount = 0;
                 highlightRight = false;
             }
             else if (arduboy.justReleased(RIGHT_BUTTON))
             {
+                frameCount = 0;
                 highlightRight = true;
             }
 
@@ -179,14 +152,25 @@ SceneId updateGame()
                     currentGameModeId = GameModeId::Play;
                     return SceneId::Game;
                 }
-                
             }
         }
         else if (currentGameModeId == GameModeId::LevelComplete)
         {
+            // Check buttons
+            if (arduboy.justReleased(LEFT_BUTTON))
+            {
+                frameCount = LevelCompleteAnimationFrames;
+                highlightRight = false;
+            }
+            else if (arduboy.justReleased(RIGHT_BUTTON))
+            {
+                frameCount = LevelCompleteAnimationFrames;
+                highlightRight = true;
+            }
+
             if (frameCount < LevelCompleteAnimationFrames)
             {
-                if (arduboy.justReleased(A_BUTTON | B_BUTTON))
+                if (arduboy.justReleased(B_BUTTON))
                 {
                     // Skip to animation end
                     frameCount = LevelCompleteAnimationFrames;
@@ -195,24 +179,39 @@ SceneId updateGame()
             else
             {
                 // Check buttons
+                if (arduboy.justReleased(LEFT_BUTTON))
+                {
+                    frameCount = LevelCompleteAnimationFrames;
+                    highlightRight = false;
+                }
+                else if (arduboy.justReleased(RIGHT_BUTTON))
+                {
+                    frameCount = LevelCompleteAnimationFrames;
+                    highlightRight = true;
+                }
+
+                // Check buttons
                 if (arduboy.justReleased(B_BUTTON))
                 {
-                    // Go to next level / endgame
-                    score += game.getHalfStars();
-                    int8_t nextLevel = game.getLevel() + 1;
+                    if (highlightRight)
+                    {
+                        // Retry level
+                        frameCount = 0;
+                        currentGameModeId = GameModeId::Play;
+                        game.loadLevel(game.getLevel(), useSetB);
+                        return SceneId::Game;
+                    }
+                    else
+                    {
+                        // Go to next level / endgame
+                        score += game.getHalfStars();
+                        int8_t nextLevel = game.getLevel() + 1;
 
-                    frameCount = 0;
-                    currentGameModeId = nextLevel == LevelCount ? GameModeId::GameComplete : GameModeId::LoadLevel;
-                    game.loadLevel(nextLevel, useSetB);
-                    return SceneId::Game;
-                }
-                else if (arduboy.justReleased(A_BUTTON))
-                {
-                    // Retry level
-                    frameCount = 0;
-                    currentGameModeId = GameModeId::LoadLevel;
-                    game.loadLevel(game.getLevel(), useSetB);
-                    return SceneId::Game;
+                        frameCount = 0;
+                        currentGameModeId = nextLevel == LevelCount ? GameModeId::GameComplete : GameModeId::Play;
+                        game.loadLevel(nextLevel, useSetB);
+                        return SceneId::Game;
+                    }
                 }
             }
         }
@@ -233,41 +232,101 @@ SceneId updateGame()
     return SceneId::Game;
 }
 
+uint8_t getBigNumberWidth(const uint8_t number)
+{
+    switch (number)
+    {
+    case 0:
+        return Number0BitmapWidth;
+    case 1:
+        return Number1BitmapWidth;
+    case 2:
+        return Number2BitmapWidth;
+    case 3:
+        return Number3BitmapWidth;
+    case 4:
+        return Number4BitmapWidth;
+    case 5:
+        return Number5BitmapWidth;
+    case 6:
+        return Number6BitmapWidth;
+    case 7:
+        return Number7BitmapWidth;
+    case 8:
+        return Number8BitmapWidth;
+    case 9:
+        return Number9BitmapWidth;
+    }
+    return 0;
+}
+
+uint8_t drawBigNumber(const int16_t x, const int16_t y, const uint8_t number)
+{
+    switch (number)
+    {
+    case 0:
+        arduboy.drawBitmap(x, y, Number0Bitmap, Number0BitmapWidth, CharBitmapHeight, WHITE);
+        break;
+    case 1:
+        arduboy.drawBitmap(x, y, Number1Bitmap, Number1BitmapWidth, CharBitmapHeight, WHITE);
+        break;
+    case 2:
+        arduboy.drawBitmap(x, y, Number2Bitmap, Number2BitmapWidth, CharBitmapHeight, WHITE);
+        break;
+    case 3:
+        arduboy.drawBitmap(x, y, Number3Bitmap, Number3BitmapWidth, CharBitmapHeight, WHITE);
+        break;
+    case 4:
+        arduboy.drawBitmap(x, y, Number4Bitmap, Number4BitmapWidth, CharBitmapHeight, WHITE);
+        break;
+    case 5:
+        arduboy.drawBitmap(x, y, Number5Bitmap, Number5BitmapWidth, CharBitmapHeight, WHITE);
+        break;
+    case 6:
+        arduboy.drawBitmap(x, y, Number6Bitmap, Number6BitmapWidth, CharBitmapHeight, WHITE);
+        break;
+    case 7:
+        arduboy.drawBitmap(x, y, Number7Bitmap, Number7BitmapWidth, CharBitmapHeight, WHITE);
+        break;
+    case 8:
+        arduboy.drawBitmap(x, y, Number8Bitmap, Number8BitmapWidth, CharBitmapHeight, WHITE);
+        break;
+    case 9:
+        arduboy.drawBitmap(x, y, Number9Bitmap, Number9BitmapWidth, CharBitmapHeight, WHITE);
+        break;
+    }
+
+    return getBigNumberWidth(number);
+}
+
+void drawHalfStars(const int16_t x, const int16_t y, const uint8_t halfStars)
+{
+    for (uint8_t star = 0; star < MaxStars; star++)
+    {
+        arduboy.drawBitmap(x + star * (StarBitmapSize + TextPadding), y, HalfStarMap[halfStars][star],
+                            StarBitmapSize, StarBitmapSize, WHITE);
+    }
+}
+
 void drawGame()
 {
     arduboy.clear();
 
-    uint8_t displayLevel = 1 + game.getLevel();
+    const uint8_t displayLevel = 1 + game.getLevel();
+    const uint8_t displayHalfStars = game.getHalfStars();
 
-    if (currentGameModeId == GameModeId::LoadLevel)
-    {
-        arduboy.setTextSize(2);
-        arduboy.setCursorX((WIDTH - getTextWidth(StringLength(LevelString) + StringLength(SpaceString) +
-                                                 (useSetB ? StringLength(BString) : StringLength(AString)) +
-                                                 (displayLevel >= 10 ? 2 : 1))) /
-                           2);
-        arduboy.setCursorY((HEIGHT - (4 * CharPixelHeight + 2 * TextPadding)) / 2);
-        arduboy.print(F(LevelString));
-        arduboy.print(F(SpaceString));
-        arduboy.print(useSetB ? F(BString) : F(AString));
-        arduboy.println(displayLevel, 10);
+    const int16_t starWidth = 3 * StarBitmapSize + 2 * TextPadding;
+    const int16_t starHeight = StarBitmapSize;
 
-        uint16_t displayPar = game.getPar();
+    const int16_t levelTextWidth = (useSetB ? LetterBBitmapWidth : LetterABitmapWidth)
+                                    + (displayLevel >= 10 ? getBigNumberWidth(displayLevel / 10) : 0)
+                                    + getBigNumberWidth(displayLevel % 10);
+    const int16_t levelTextHeight = CharBitmapHeight;
 
-        arduboy.setTextSize(1);
-        arduboy.setCursorX((WIDTH - getTextWidth((displayPar >= 10 ? 2 : 1) + StringLength(SpaceString) +
-                                                 StringLength(MinMovesString))) /
-                           2);
-        arduboy.setCursorY(arduboy.getCursorY() + TextPadding);
-        arduboy.print(displayPar, 10);
-        arduboy.print(F(SpaceString));
-        arduboy.println(F(MinMovesString));
+    int16_t drawX = 0;
+    int16_t drawY = 0;
 
-        arduboy.setCursorX((WIDTH - getTextWidth(StringLength(PressAToContinueString))) / 2);
-        arduboy.setCursorY(arduboy.getCursorY() + TextPadding);
-        arduboy.print(F(PressAToContinueString));
-    }
-    else if (currentGameModeId == GameModeId::Play)
+    if (currentGameModeId == GameModeId::Play)
     {
         // Draw Playfield
         arduboy.drawRoundRect(PlayfieldX, PlayfieldY, PlayfieldWidth, PlayfieldHeight, 1, WHITE);
@@ -289,103 +348,169 @@ void drawGame()
             }
         }
 
-        arduboy.setTextSize(1);
-        arduboy.setCursorX(WIDTH - (WIDTH / 4) -
-                           getTextWidth(StringLength(LevelString) + StringLength(SpaceString) +
-                                        (useSetB ? StringLength(BString) : StringLength(AString)) +
-                                        (displayLevel >= 10 ? 2 : 1)) /
-                               2);
-        arduboy.setCursorY((HEIGHT - (4 * CharPixelHeight + 2 * TextPadding)) / 2);
-        arduboy.print(F(LevelString));
-        arduboy.print(F(SpaceString));
-        arduboy.print(useSetB ? F(BString) : F(AString));
-        arduboy.println(displayLevel, 10);
+        // Draw display level
+        drawX = (WIDTH - (WIDTH / 4)) - (levelTextWidth / 2);
+        drawY = (HEIGHT / 2) - ((levelTextHeight + TextPadding + starHeight) / 2);
 
-        uint16_t remainingMoves = game.getPar() - min(game.getPar(), game.getMoves());
+        if (useSetB)
+        {
+            arduboy.drawBitmap(drawX, drawY, LetterBBitmap, LetterBBitmapWidth, CharBitmapHeight, WHITE);
+            drawX += LetterBBitmapWidth;
+        }
+        else
+        {
+            arduboy.drawBitmap(drawX, drawY, LetterABitmap, LetterABitmapWidth, CharBitmapHeight, WHITE);
+            drawX += LetterABitmapWidth;
+        }
 
-        arduboy.setTextSize(2);
-        arduboy.setCursorX(WIDTH - (WIDTH / 4) - getTextWidth((remainingMoves >= 10 ? 2 : 1)) / 2);
-        arduboy.setCursorY(arduboy.getCursorY() + TextPadding);
-        arduboy.println(remainingMoves, 10);
+        if (displayLevel >= 10)
+        {
+            drawX += drawBigNumber(drawX, drawY, displayLevel / 10);
+        }
+        drawX += drawBigNumber(drawX, drawY, displayLevel % 10);
 
-        arduboy.setTextSize(1);
-        arduboy.setCursorX(WIDTH - (WIDTH / 4) -
-                           getTextWidth(StringLength(ScoreString) + StringLength(SpaceString) +
-                                        (score >= 100 ? 3 : (score >= 10 ? 2 : 1))) /
-                               2);
-        arduboy.setCursorY(arduboy.getCursorY() + TextPadding);
-        arduboy.print(F(ScoreString));
-        arduboy.print(F(SpaceString));
-        arduboy.println(score, 10);
+        // Draw current stars
+        drawX = (WIDTH - (WIDTH / 4)) - (starWidth / 2);
+        drawY += levelTextHeight + TextPadding;
+
+        drawHalfStars(drawX, drawY, displayHalfStars);
     }
     else if (currentGameModeId == GameModeId::Paused)
     {
-        const uint16_t pausedX = (WIDTH - PausedBitmapWidth) / 2;
-        const uint16_t pausedY = PausedMargin;
-        arduboy.drawBitmap(pausedX, pausedY, PausedBitmap, PausedBitmapWidth, PausedBitmapHeight, WHITE);
+        // Draw paused
+        drawX = (WIDTH / 2) - (PausedBitmapWidth / 2);
+        drawY = (HEIGHT / 2) - ((PausedBitmapHeight + TextPadding + max(ResumeBitmapHeight, RetryBitmapHeight)) / 2);
 
-        const int16_t buttonY = (pausedY + PausedBitmapHeight + PausedMargin) + PausedButtonsYMargin;
+        arduboy.drawBitmap(drawX, drawY, PausedBitmap, PausedBitmapWidth, PausedBitmapHeight, WHITE);
 
-        const int16_t resumeButtonX = PausedButtonsXMargin;
-        arduboy.drawBitmap(resumeButtonX, buttonY, ResumeBitmap, ResumeBitmapWidth, ResumeBitmapHeight, WHITE);
+        // Draw resume button
+        drawX = (WIDTH / 4) - (ResumeBitmapWidth / 2);
+        drawY += PausedBitmapHeight + TextPadding;
 
-        const int16_t retryButtonX = PausedButtonsXMargin + ResumeBitmapWidth + PausedButtonsXMargin;
-        arduboy.drawBitmap(retryButtonX, buttonY, RetryBitmap, RetryBitmapWidth, RetryBitmapHeight, WHITE);
+        arduboy.drawBitmap(drawX, drawY, ResumeBitmap, ResumeBitmapWidth, ResumeBitmapHeight, WHITE);
 
-        const int16_t highlightX = (highlightRight ? retryButtonX : resumeButtonX) - 2;
-        const int16_t highlightY = buttonY - 2;
-        arduboy.drawRoundRect(highlightX, highlightY, (highlightRight ? RetryBitmapWidth : ResumeBitmapWidth) + 4, (highlightRight ? RetryBitmapHeight : ResumeBitmapHeight) + 4, 1, WHITE);
+        if (!highlightRight)
+        {
+            arduboy.drawRoundRect(drawX - 2, drawY - 2, ResumeBitmapWidth + 4, ResumeBitmapHeight + 4, 1, WHITE);    
+        }
+
+        // Draw retry button
+        drawX = (WIDTH - (WIDTH / 4)) - (RetryBitmapWidth / 2);
+        arduboy.drawBitmap(drawX, drawY, RetryBitmap, RetryBitmapWidth, RetryBitmapHeight, WHITE);
+
+        if (highlightRight)
+        {
+            arduboy.drawRoundRect(drawX - 2, drawY - 2, RetryBitmapWidth + 4, RetryBitmapHeight + 4, 1, WHITE);    
+        }
     }
     else if (currentGameModeId == GameModeId::LevelComplete)
     {
-        uint8_t displayHalfStars = game.getHalfStars();
+        // Draw display level
+        drawX = (WIDTH / 2) - (levelTextWidth / 2);
+        drawY = (HEIGHT / 2) - ((levelTextHeight + TextPadding + starHeight + TextPadding + max(NextBitmapHeight, RetryBitmapHeight)) / 2);
 
-        arduboy.setTextSize(1);
-        arduboy.setCursorX((WIDTH - getTextWidth(StringLength(LevelString) + StringLength(SpaceString) +
-                                                 (useSetB ? StringLength(BString) : StringLength(AString)) +
-                                                 (displayLevel >= 10 ? 2 : 1) + StringLength(SpaceString) +
-                                                 (displayHalfStars >= MaxHalfStars ? StringLength(PerfectString)
-                                                                                   : StringLength(CompleteString)))) /
-                           2);
-        arduboy.setCursorY((HEIGHT - (3 * CharPixelHeight + StarBitmapSize + 3 * TextPadding)) / 2);
-        arduboy.print(F(LevelString));
-        arduboy.print(F(SpaceString));
-        arduboy.print(useSetB ? F(BString) : F(AString));
-        arduboy.print(displayLevel, 10);
-        arduboy.print(F(SpaceString));
-        arduboy.println(displayHalfStars >= MaxHalfStars ? F(PerfectString) : F(CompleteString));
-
-        const uint8_t px = (WIDTH - MaxStars * (StarBitmapSize + TextPadding) - TextPadding) / 2;
-        const uint8_t py = arduboy.getCursorY() + TextPadding;
-
-        for (uint8_t star = 0; star < MaxStars; star++)
+        if (useSetB)
         {
-            arduboy.drawBitmap(px + star * (StarBitmapSize + TextPadding), py, HalfStarMap[displayHalfStars][star],
-                               StarBitmapSize, StarBitmapSize, WHITE);
+            arduboy.drawBitmap(drawX, drawY, LetterBBitmap, LetterBBitmapWidth, CharBitmapHeight, WHITE);
+            drawX += LetterBBitmapWidth;
         }
-        arduboy.setCursorY(py + StarBitmapSize);
+        else
+        {
+            arduboy.drawBitmap(drawX, drawY, LetterABitmap, LetterABitmapWidth, CharBitmapHeight, WHITE);
+            drawX += LetterABitmapWidth;
+        }
 
-        arduboy.setCursorX((WIDTH - getTextWidth(StringLength(PressAToContinueString))) / 2);
-        arduboy.setCursorY(arduboy.getCursorY() + TextPadding);
-        arduboy.println(F(PressAToContinueString));
+        if (displayLevel >= 10)
+        {
+            drawX += drawBigNumber(drawX, drawY, displayLevel / 10);
+        }
+        drawX += drawBigNumber(drawX, drawY, displayLevel % 10);
 
-        arduboy.setCursorX((WIDTH - getTextWidth(StringLength(PressBToRetryString))) / 2);
-        arduboy.setCursorY(arduboy.getCursorY() + TextPadding);
-        arduboy.println(F(PressBToRetryString));
+        // Draw final stars
+        drawX = (WIDTH / 2) - (starWidth / 2);
+        drawY += levelTextHeight + TextPadding;
+
+        drawHalfStars(drawX, drawY, displayHalfStars);
+
+        // Draw next button
+        drawX = (WIDTH / 4) - (NextBitmapHeight / 2);
+        drawY += starHeight + TextPadding;
+
+        arduboy.drawBitmap(drawX, drawY, NextBitmap, NextBitmapWidth, NextBitmapHeight, WHITE);
+
+        if (!highlightRight)
+        {
+            arduboy.drawRoundRect(drawX - 2, drawY - 2, NextBitmapWidth + 4, NextBitmapHeight + 4, 1, WHITE);    
+        }
+
+        // Draw retry button
+        drawX = (WIDTH - (WIDTH / 4)) - (RetryBitmapWidth / 2);
+        arduboy.drawBitmap(drawX, drawY, RetryBitmap, RetryBitmapWidth, RetryBitmapHeight, WHITE);
+
+        if (highlightRight)
+        {
+            arduboy.drawRoundRect(drawX - 2, drawY - 2, RetryBitmapWidth + 4, RetryBitmapHeight + 4, 1, WHITE);    
+        }
     }
     else if (currentGameModeId == GameModeId::GameComplete)
     {
-        arduboy.setTextSize(2);
-        arduboy.setCursorX((WIDTH - getTextWidth(StringLength(GameOverString))) / 2);
-        arduboy.setCursorY((HEIGHT - (4 * CharPixelHeight + TextPadding)) / 2);
-        arduboy.println(F(GameOverString));
+        // Draw ending title
+        drawX = (WIDTH / 2) - ((useSetB ? LetterBBitmapWidth : LetterABitmapWidth) / 2) - ((StarBitmapSize + TextPadding) / 2) - ((StarBitmapSize + TextPadding) / 2);
+        drawY = (HEIGHT / 2) - ((2 * CharBitmapHeight + TextPadding) / 2);
 
-        arduboy.setTextSize(2);
-        arduboy.setCursorX(
-            (WIDTH - getTextWidth((score >= 100 ? 3 : (score >= 10 ? 2 : 1)) + StringLength(SlashString) + 3)) / 2);
-        arduboy.setCursorY(arduboy.getCursorY() + TextPadding);
-        arduboy.print(score, 10);
-        arduboy.print(F(SlashString));
-        arduboy.println(PerfectScore, 10);
+        arduboy.drawBitmap(drawX, drawY + ((CharBitmapHeight - StarBitmapSize) / 2), StarBitmap2, StarBitmapSize, StarBitmapSize, WHITE);
+        drawX += StarBitmapSize + TextPadding;
+        
+        if (useSetB)
+        {
+            arduboy.drawBitmap(drawX, drawY, LetterBBitmap, LetterBBitmapWidth, CharBitmapHeight, WHITE);
+            drawX += LetterBBitmapWidth + TextPadding;
+        }
+        else
+        {
+            arduboy.drawBitmap(drawX, drawY, LetterABitmap, LetterABitmapWidth, CharBitmapHeight, WHITE);
+            drawX += LetterABitmapWidth + TextPadding;
+        }
+
+        arduboy.drawBitmap(drawX, drawY + ((CharBitmapHeight - StarBitmapSize) / 2), StarBitmap2, StarBitmapSize, StarBitmapSize, WHITE);
+
+        drawY += CharBitmapHeight + TextPadding;
+
+        const int16_t scoreTextWidth = (score >= 100 ? getBigNumberWidth(score / 100) : 0)
+                                    + (score >= 10 ? getBigNumberWidth((score % 100) / 10) : 0)
+                                    + getBigNumberWidth(score % 10)
+                                    + SlashBitmapWidth
+                                    + (PerfectScore >= 100 ? getBigNumberWidth(PerfectScore / 100) : 0)
+                                    + (PerfectScore >= 10 ? getBigNumberWidth((PerfectScore % 100) / 10) : 0)
+                                    + getBigNumberWidth(PerfectScore % 10);
+        const int16_t scoreTextHeight = CharBitmapHeight;
+
+        // Draw final score
+        drawX = (WIDTH / 2) - (scoreTextWidth / 2);
+
+        if (score >= 100)
+        {
+            drawX += drawBigNumber(drawX, drawY, score / 100);
+            drawX += drawBigNumber(drawX, drawY, (score % 100) / 10);
+        }
+        else if (score >= 10)
+        {
+            drawX += drawBigNumber(drawX, drawY, score / 10);
+        }
+        drawX += drawBigNumber(drawX, drawY, score % 10);
+
+        arduboy.drawBitmap(drawX, drawY, SlashBitmap, SlashBitmapWidth, CharBitmapHeight, WHITE);
+        drawX += SlashBitmapWidth;
+
+        if (PerfectScore >= 100)
+        {
+            drawX += drawBigNumber(drawX, drawY, PerfectScore / 100);
+            drawX += drawBigNumber(drawX, drawY, (PerfectScore % 100) / 10);
+        }
+        else if (PerfectScore >= 10)
+        {
+            drawX += drawBigNumber(drawX, drawY, PerfectScore / 10);
+        }
+        drawX += drawBigNumber(drawX, drawY, PerfectScore % 10);
     }
 }

@@ -47,15 +47,8 @@ void GameEngine::toggleSelectedLight()
 
 uint8_t GameEngine::getHalfStars()
 {
-    if (m_moves <= m_par)
-    {
-        return MaxHalfStars;
-    }
-    else
-    {
-        uint8_t halfStarsLost = (m_moves - m_par) / 2;
-        return max(MinHalfStars, MaxHalfStars - halfStarsLost);
-    }
+    uint8_t halfStarsLost = m_moves <= m_par ? 0 : max(0, (1 + m_moves - m_par) / 2);
+    return max(MinHalfStars, MaxHalfStars - halfStarsLost);
 }
 
 void GameEngine::toggleLight(const int8_t x, const int8_t y)

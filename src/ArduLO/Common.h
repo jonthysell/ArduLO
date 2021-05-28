@@ -26,6 +26,6 @@ extern bool useSetB;
 uint8_t getTextWidth(const uint8_t charCount);
 uint8_t getTextHeight();
 
-float boundedMap(float x, float in_min, float in_max, float out_min, float out_max);
+float boundedMap(const float x, const float in_min, const float in_max, const float out_min, const float out_max);
 
 #endif

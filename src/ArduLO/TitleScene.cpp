@@ -13,9 +13,6 @@ const int16_t TitleMargin = (WIDTH - TitleBitmapWidth) / 2;
 const uint16_t TitleAnimationFrames = FrameRate;
 const uint16_t TitleMaxFrames = FrameRate * 15;
 
-const int16_t SetXMargin = (WIDTH - SetABitmapWidth - SetBBitmapWidth) / 3;
-const int16_t SetYMargin = (HEIGHT - TitleBitmapHeight - TitleMargin - TitleMargin - SetABitmapHeight) / 2;
-
 void initTitle()
 {
     frameCount = 0;
@@ -30,10 +27,12 @@ SceneId updateTitle()
     {
         if (arduboy.justReleased(LEFT_BUTTON))
         {
+            frameCount = TitleAnimationFrames;
             useSetB = false;
         }
         else if (arduboy.justReleased(RIGHT_BUTTON))
         {
+            frameCount = TitleAnimationFrames;
             useSetB = true;
         }
 
@@ -61,23 +60,34 @@ void drawTitle()
 {
     arduboy.clear();
 
-    const int16_t titleX = TitleMargin;
-    const int16_t titleY = (int16_t)boundedMap(frameCount, 0, TitleAnimationFrames, -TitleBitmapHeight, TitleMargin);
+    // Draw title
+    int16_t drawX = TitleMargin;
+    int16_t drawY = (int16_t)boundedMap(frameCount, 0, TitleAnimationFrames, -TitleBitmapHeight, TitleMargin);
 
-    arduboy.drawBitmap(titleX, titleY, TitleBitmap, TitleBitmapWidth, TitleBitmapHeight, WHITE);
+    arduboy.drawBitmap(drawX, drawY, TitleBitmap, TitleBitmapWidth, TitleBitmapHeight, WHITE);
 
     if (frameCount > TitleAnimationFrames)
     {
-        const int16_t setY = (titleY + TitleBitmapHeight + TitleMargin) + SetYMargin;
+        // Draw A button
+        drawX = WIDTH / 4 - (LetterABitmapWidth / 2);
+        drawY = HEIGHT - (HEIGHT / 4) - (CharBitmapHeight / 2);
 
-        const int16_t setAX = SetXMargin;
-        arduboy.drawBitmap(setAX, setY, SetABitmap, SetABitmapWidth, SetABitmapHeight, WHITE);
+        arduboy.drawBitmap(drawX, drawY, LetterABitmap, LetterABitmapWidth, CharBitmapHeight, WHITE);
 
-        const int16_t setBX = SetXMargin + SetABitmapWidth + SetXMargin;
-        arduboy.drawBitmap(setBX, setY, SetBBitmap, SetBBitmapWidth, SetBBitmapHeight, WHITE);
+        if (!useSetB)
+        {
+           arduboy.drawRoundRect(drawX - 1, drawY, LetterABitmapWidth + 2, CharBitmapHeight - 1, 1, WHITE); 
+        }
 
-        const int16_t highlightX = (useSetB ? setBX : setAX) - 2;
-        const int16_t highlightY = setY - 2;
-        arduboy.drawRoundRect(highlightX, highlightY, SetABitmapWidth + 4, SetABitmapHeight + 4, 1, WHITE);
+        // Draw B button
+        drawX = WIDTH - (WIDTH / 4) - (LetterBBitmapWidth / 2);
+        drawY = HEIGHT - (HEIGHT / 4) - ((CharBitmapHeight) / 2);
+
+        arduboy.drawBitmap(drawX, drawY, LetterBBitmap, LetterBBitmapWidth, CharBitmapHeight, WHITE);
+
+        if (useSetB)
+        {
+           arduboy.drawRoundRect(drawX - 1, drawY, LetterBBitmapWidth + 2, CharBitmapHeight - 1, 1, WHITE); 
+        }
     }
 }
