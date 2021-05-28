@@ -30,8 +30,6 @@ const uint8_t *HalfStarMap[][3] = {
     {StarBitmap2, StarBitmap2, StarBitmap2},
 };
 
-extern Arduboy2 arduboy;
-
 GameEngine game;
 
 uint16_t score;
