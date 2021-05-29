@@ -1,3 +1,5 @@
+![ArduLO Demo](./.github/demo.gif)
+
 # ArduLO #
 
 ArduLO is a clone of the puzzle game [Lights Out](https://en.wikipedia.org/wiki/Lights_Out_(game)) for the [Arduboy](https://arduboy.com/).
@@ -15,11 +17,21 @@ Then, within the Arduino IDE, open src/ArduLO/ArduLO.ino, and run Sketch > Verif
 
 ## Play ##
 
-The objective is to turn off all of the lights in as few moves as possible. Toggling a light will cause the lights directly connected to also toggle, in the shape of a plus.
+![ArduLO Title Screenshot](./.github/screenshots/title.gif)
 
-Use the D-Pad to select the light you want to toggle, and press B to toggle the light. Press A to pause.
+ArduLO contains two sets of 50 puzzles. At the title screen you can select either set "A" or "B" with the D-Pad. Then press the B button to start the game.
 
-There are two sets of 50 puzzles each. Select either "Set A" or "Set B" at the title screen.
+![ArduLO Game Screenshot](./.github/screenshots/game.gif)
+
+The objective is to turn off all of the lights in as few moves as possible. Use the D-Pad to select the light you want to toggle, and press the B button to toggle. Toggling a light will cause the nearby lights to toggle in the shape of a plus.
+
+![ArduLO Paused Screenshot](./.github/screenshots/paused.gif)
+
+Pressing the A button will pause the game. Within the pause menu you can also choose to restart the puzzle.
+
+![ArduLO Level Done Screenshot](./.github/screenshots/leveldone.gif)
+
+After finshing a puzzle, you'll be given a score in one to three stars. Here you can either move on to the next puzzle or retry for a better score. Try to get three stars on all 50 levels in the set!
 
 ## Errata ##
 
