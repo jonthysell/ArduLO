@@ -12,7 +12,7 @@
 #include "GameEngine.h"
 #include "Scenes.h"
 
-const uint16_t LevelCompleteAnimationFrames = FrameRate;
+const uint16_t LevelCompleteAnimationFrames = FrameRate / 2;
 
 const uint8_t PlayfieldMargin = 2;
 const uint8_t PlayfieldX = PlayfieldMargin;
@@ -459,7 +459,7 @@ void drawGame()
         drawX = (WIDTH / 2) - (starWidth / 2);
         drawY += levelTextHeight + TextPadding;
 
-        drawHalfStars(drawX, drawY, displayHalfStars);
+        drawHalfStars(drawX, drawY, min(displayHalfStars, (uint8_t)boundedMap(frameCount, 0, LevelCompleteAnimationFrames, 0, MaxHalfStars)));
 
         // Draw next button
         drawX = (WIDTH / 4) - (NextBitmapHeight / 2);
@@ -487,7 +487,11 @@ void drawGame()
         drawX = (WIDTH / 2) - ((useSetB ? LetterBBitmapWidth : LetterABitmapWidth) / 2) - ((StarBitmapSize + TextPadding) / 2) - ((StarBitmapSize + TextPadding) / 2);
         drawY = (HEIGHT / 2) - ((2 * CharBitmapHeight + TextPadding) / 2);
 
-        arduboy.drawBitmap(drawX, drawY + ((CharBitmapHeight - StarBitmapSize) / 2), StarBitmap2, StarBitmapSize, StarBitmapSize, WHITE);
+        if (blinkOneSecond)
+        {
+            arduboy.drawBitmap(drawX, drawY + ((CharBitmapHeight - StarBitmapSize) / 2), StarBitmap2, StarBitmapSize, StarBitmapSize, WHITE);
+        }
+
         drawX += StarBitmapSize + TextPadding;
         
         if (useSetB)
@@ -501,7 +505,10 @@ void drawGame()
             drawX += LetterABitmapWidth + TextPadding;
         }
 
-        arduboy.drawBitmap(drawX, drawY + ((CharBitmapHeight - StarBitmapSize) / 2), StarBitmap2, StarBitmapSize, StarBitmapSize, WHITE);
+        if (blinkOneSecond)
+        {
+            arduboy.drawBitmap(drawX, drawY + ((CharBitmapHeight - StarBitmapSize) / 2), StarBitmap2, StarBitmapSize, StarBitmapSize, WHITE);
+        }
 
         drawY += CharBitmapHeight + TextPadding;
 

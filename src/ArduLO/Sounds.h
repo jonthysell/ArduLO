@@ -8,7 +8,7 @@
 #ifndef SOUNDS_H
 #define SOUNDS_H
 
-const uint16_t BaseNoteDuration = 50;
+const uint16_t BaseNoteDuration = 64;
 
 const uint16_t MoveSound = NOTE_C4;
 const uint16_t MoveSoundDuration = BaseNoteDuration*2;
