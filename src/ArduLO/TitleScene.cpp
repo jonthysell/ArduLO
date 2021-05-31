@@ -30,10 +30,12 @@ SceneId updateTitle()
         if (arduboy.justReleased(LEFT_BUTTON))
         {
             moveSelection(TitleAnimationFrames, -1, 2);
+            return SceneId::Title;
         }
         else if (arduboy.justReleased(RIGHT_BUTTON))
         {
             moveSelection(TitleAnimationFrames, 1, 2);
+            return SceneId::Title;
         }
 
         if (arduboy.justReleased(B_BUTTON))
@@ -45,23 +47,19 @@ SceneId updateTitle()
             }
             else
             {
-                switch (selectedIndex)
+                if (selectedIndex == 0 || selectedIndex == 1)
                 {
-                case 0:
-                    // Start Game A
-                    useSetB = false;
+                    // Start Game
+                    useSetB = selectedIndex == 1;
                     sound.tone(ToggleSound, ToggleSoundDuration);
                     return SceneId::Game;
-                case 1:
-                    // Start Game B
-                    useSetB = true;
-                    sound.tone(ToggleSound, ToggleSoundDuration);
-                    return SceneId::Game;
-                case 2:
+
+                }
+                else if (selectedIndex == 2)
+                {
                     // Toggle audio
                     frameCount = TitleAnimationFrames;
                     toggleSound();
-                    break;
                 }
             }
         }

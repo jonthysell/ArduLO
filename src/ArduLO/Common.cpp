@@ -10,11 +10,10 @@ ArduboyTones sound(arduboy.audio.enabled);
 
 uint16_t frameCount;
 
-int8_t selectedIndex = 0;
+int8_t selectedIndex;
 
 void toggleSound()
 {
-    sound.tone(ToggleSound, ToggleSoundDuration);
     if (arduboy.audio.enabled())
     {
         arduboy.audio.off();

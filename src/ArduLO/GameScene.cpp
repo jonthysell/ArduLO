@@ -12,7 +12,7 @@
 #include "GameEngine.h"
 #include "Scenes.h"
 
-const uint16_t LevelCompleteAnimationFrames = 0;
+const uint16_t LevelCompleteAnimationFrames = FrameRate;
 
 const uint8_t PlayfieldMargin = 2;
 const uint8_t PlayfieldX = PlayfieldMargin;
@@ -69,14 +69,13 @@ SceneId updateGame()
     // Game Mode Init
     if (frameCount == 0)
     {
-        switch (currentGameModeId)
+        if (currentGameModeId == GameModeId::LevelComplete)
         {
-            case GameModeId::LevelComplete:
-                sound.tones(LevelCompleteSound);
-                break;
-            case GameModeId::GameComplete:
-                sound.tones(GameCompleteSound);
-                break;
+            sound.tones(LevelCompleteSound);
+        }
+        else if (currentGameModeId == GameModeId::GameComplete)
+        {
+            sound.tones(GameCompleteSound);
         }
     }
 
@@ -101,20 +100,24 @@ SceneId updateGame()
             if (arduboy.pressed(UP_BUTTON))
             {
                 moveSelectedLight(0, -1);
+                return SceneId::Game;
             }
             else if (arduboy.pressed(DOWN_BUTTON))
             {
                 moveSelectedLight(0, 1);
+                return SceneId::Game;
             }
 
             // Check left-right directionals
             if (arduboy.pressed(LEFT_BUTTON))
             {
                 moveSelectedLight(-1, 0);
+                return SceneId::Game;
             }
             else if (arduboy.pressed(RIGHT_BUTTON))
             {
                 moveSelectedLight(1, 0);
+                return SceneId::Game;
             }
 
             // Check buttons
@@ -123,6 +126,7 @@ SceneId updateGame()
                 frameCount = 0;
                 game.toggleSelectedLight();
                 sound.tone(ToggleSound, ToggleSoundDuration);
+                return SceneId::Game;
             }
             else if (arduboy.justReleased(A_BUTTON))
             {
@@ -140,10 +144,12 @@ SceneId updateGame()
             if (arduboy.justReleased(LEFT_BUTTON))
             {
                 moveSelection(0, -1, 2);
+                return SceneId::Game;
             }
             else if (arduboy.justReleased(RIGHT_BUTTON))
             {
                 moveSelection(0, 1, 2);
+                return SceneId::Game;
             }
 
             if (arduboy.justReleased(A_BUTTON))
@@ -157,23 +163,22 @@ SceneId updateGame()
             else if (arduboy.justReleased(B_BUTTON))
             {
                 frameCount = 0;
-                switch (selectedIndex)
+                sound.tone(ToggleSound, ToggleSoundDuration);
+                if (selectedIndex == 0)
                 {
-                case 0:
                     // Unpause game
-                    sound.tone(ToggleSound, ToggleSoundDuration);
                     currentGameModeId = GameModeId::Play;
-                    break;
-                case 1:
+                }
+                else if (selectedIndex == 1)
+                {
                     // Reset puzzle
-                    sound.tone(ToggleSound, ToggleSoundDuration);
                     currentGameModeId = GameModeId::Play;
                     game.loadLevel(game.getLevel(), useSetB);
-                    break;
-                case 2:
+                }
+                else if (selectedIndex == 2)
+                {
                     // Toggle audio
                     toggleSound();
-                    break;
                 }
                 return SceneId::Game;
             }
@@ -186,6 +191,7 @@ SceneId updateGame()
                 {
                     // Skip to animation end
                     frameCount = LevelCompleteAnimationFrames;
+                    return SceneId::Game;
                 }
             }
             else
@@ -194,31 +200,30 @@ SceneId updateGame()
                 if (arduboy.justReleased(LEFT_BUTTON))
                 {
                     moveSelection(LevelCompleteAnimationFrames, -1, 1);
+                    return SceneId::Game;
                 }
                 else if (arduboy.justReleased(RIGHT_BUTTON))
                 {
                     moveSelection(LevelCompleteAnimationFrames, 1, 1);
+                    return SceneId::Game;
                 }
 
-                // Check buttons
                 if (arduboy.justReleased(B_BUTTON))
                 {
                     frameCount = 0;
-                    switch (selectedIndex)
+                    sound.tone(ToggleSound, ToggleSoundDuration);
+                    if (selectedIndex == 0)
                     {
-                    case 0:
-                        // Go to next level / endgame
                         score += game.getHalfStars();
                         int8_t nextLevel = game.getLevel() + 1;
                         currentGameModeId = nextLevel == LevelCount ? GameModeId::GameComplete : GameModeId::Play;
                         game.loadLevel(nextLevel, useSetB);
-                        break;
-                    case 1:
-                        // Retry level
-                        sound.tone(ToggleSound, ToggleSoundDuration);
+                        
+                    }
+                    else if (selectedIndex == 1)
+                    {
                         currentGameModeId = GameModeId::Play;
                         game.loadLevel(game.getLevel(), useSetB);
-                        break;
                     }
                     return SceneId::Game;
                 }
