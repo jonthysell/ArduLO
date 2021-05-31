@@ -24,7 +24,7 @@ class GameEngine
 
     bool getLight(const int8_t x, const int8_t y);
 
-    void selectLight(const int8_t x, const int8_t y);
+    bool selectLight(const int8_t x, const int8_t y);
     void toggleSelectedLight();
 
     bool isCompleted()

@@ -10,6 +10,7 @@ To build ArduoLO from source, you'll need to install:
 
 * [Arduino IDE](https://www.arduino.cc/en/Main/Software)
 * [Arduboy2 Library](https://github.com/MLXXXp/Arduboy2)
+* [ArduboyTones Library](https://github.com/MLXXXp/ArduboyTones)
 
 For more help on setting up the a Arduboy development environment, see [Learning to Program the Arduboy](https://arduboy.com/download-and-learn-arduino/).
 

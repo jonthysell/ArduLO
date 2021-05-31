@@ -12,6 +12,7 @@ void setup()
     arduboy.begin();
     arduboy.setFrameRate(FrameRate);
     arduboy.initRandomSeed();
+    arduboy.audio.on();
 }
 
 void loop()

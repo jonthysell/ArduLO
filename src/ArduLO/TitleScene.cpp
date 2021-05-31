@@ -6,6 +6,7 @@
 #include "Common.h"
 
 #include "Bitmaps.h"
+#include "Sounds.h"
 #include "Scenes.h"
 
 const int16_t TitleMargin = (WIDTH - TitleBitmapWidth) / 2;
@@ -16,6 +17,7 @@ const uint16_t TitleMaxFrames = FrameRate * 15;
 void initTitle()
 {
     frameCount = 0;
+    selectedIndex = 0;
 }
 
 SceneId updateTitle()
@@ -27,13 +29,11 @@ SceneId updateTitle()
     {
         if (arduboy.justReleased(LEFT_BUTTON))
         {
-            frameCount = TitleAnimationFrames;
-            useSetB = false;
+            moveSelection(TitleAnimationFrames, -1, 2);
         }
         else if (arduboy.justReleased(RIGHT_BUTTON))
         {
-            frameCount = TitleAnimationFrames;
-            useSetB = true;
+            moveSelection(TitleAnimationFrames, 1, 2);
         }
 
         if (arduboy.justReleased(B_BUTTON))
@@ -45,8 +45,24 @@ SceneId updateTitle()
             }
             else
             {
-                // Start Game
-                return SceneId::Game;
+                switch (selectedIndex)
+                {
+                case 0:
+                    // Start Game A
+                    useSetB = false;
+                    sound.tone(ToggleSound, ToggleSoundDuration);
+                    return SceneId::Game;
+                case 1:
+                    // Start Game B
+                    useSetB = true;
+                    sound.tone(ToggleSound, ToggleSoundDuration);
+                    return SceneId::Game;
+                case 2:
+                    // Toggle audio
+                    frameCount = TitleAnimationFrames;
+                    toggleSound();
+                    break;
+                }
             }
         }
     }
@@ -69,25 +85,40 @@ void drawTitle()
     if (frameCount > TitleAnimationFrames)
     {
         // Draw A button
-        drawX = WIDTH / 4 - (LetterABitmapWidth / 2);
-        drawY = HEIGHT - (HEIGHT / 4) - (CharBitmapHeight / 2);
+        drawX = (WIDTH / 4) - (LetterABitmapWidth / 2);
+        drawY = ((HEIGHT + TitleMargin + TitleBitmapHeight + TitleMargin) / 2) - (CharBitmapHeight / 2);
 
         arduboy.drawBitmap(drawX, drawY, LetterABitmap, LetterABitmapWidth, CharBitmapHeight, WHITE);
 
-        if (!useSetB)
+        if (selectedIndex == 0)
         {
-           arduboy.drawRoundRect(drawX - 1, drawY, LetterABitmapWidth + 2, CharBitmapHeight - 1, 1, WHITE); 
+           arduboy.drawRoundRect(drawX - 2, drawY, LetterABitmapWidth + 4, CharBitmapHeight - 1, 1, WHITE); 
         }
 
         // Draw B button
-        drawX = WIDTH - (WIDTH / 4) - (LetterBBitmapWidth / 2);
-        drawY = HEIGHT - (HEIGHT / 4) - ((CharBitmapHeight) / 2);
+        drawX = WIDTH - (WIDTH / 2) - (LetterBBitmapWidth / 2);
+        drawY = ((HEIGHT + TitleMargin + TitleBitmapHeight + TitleMargin) / 2) - (CharBitmapHeight / 2);
 
         arduboy.drawBitmap(drawX, drawY, LetterBBitmap, LetterBBitmapWidth, CharBitmapHeight, WHITE);
 
-        if (useSetB)
+        if (selectedIndex == 1)
         {
-           arduboy.drawRoundRect(drawX - 1, drawY, LetterBBitmapWidth + 2, CharBitmapHeight - 1, 1, WHITE); 
+           arduboy.drawRoundRect(drawX - 2, drawY, LetterBBitmapWidth + 4, CharBitmapHeight - 1, 1, WHITE); 
+        }
+
+        // Draw sound button
+        drawX = WIDTH - (WIDTH / 4) - ((SoundBitmapWidth + SoundBitmapWidth) / 2);
+        drawY = ((HEIGHT + TitleMargin + TitleBitmapHeight + TitleMargin) / 2) - (SoundBitmapHeight / 2);
+
+        arduboy.drawBitmap(drawX, drawY, Sound0Bitmap, SoundBitmapWidth, SoundBitmapHeight, WHITE);
+        if (arduboy.audio.enabled())
+        {
+            arduboy.drawBitmap(drawX + SoundBitmapWidth, drawY, Sound1Bitmap, SoundBitmapWidth, SoundBitmapHeight, WHITE);
+        }
+
+        if (selectedIndex == 2)
+        {    
+           arduboy.drawRoundRect(drawX - 3, drawY - 3, SoundBitmapWidth + SoundBitmapWidth + 6, SoundBitmapHeight + 5, 1, WHITE); 
         }
     }
 }

@@ -29,10 +29,15 @@ bool GameEngine::getLight(const int8_t x, const int8_t y)
     return false;
 }
 
-void GameEngine::selectLight(const int8_t x, const int8_t y)
+bool GameEngine::selectLight(const int8_t x, const int8_t y)
 {
+    const int8_t oldX = m_selectedX;
+    const int8_t oldY = m_selectedY;
+
     m_selectedX = max(0, min(x, PuzzleSize - 1));
     m_selectedY = max(0, min(y, PuzzleSize - 1));
+
+    return (oldX != m_selectedX || oldY != m_selectedY);
 }
 
 void GameEngine::toggleSelectedLight()
