@@ -20,7 +20,7 @@ Then, within the Arduino IDE, open src/ArduLO/ArduLO.ino, and run Sketch > Verif
 
 ![ArduLO Title Screenshot](./.github/screenshots/title.gif)
 
-ArduLO contains two sets of 50 puzzles. At the title screen you can select either set "A" or "B" with the D-Pad. Then press the B button to start the game.
+ArduLO contains two sets of 50 puzzles. At the title screen you can select either Set A or Set B with the D-Pad, then press the B button to start the game. You can also toggle sound on and off.
 
 ![ArduLO Game Screenshot](./.github/screenshots/game.gif)
 
@@ -28,7 +28,7 @@ The objective is to turn off all of the lights in as few moves as possible. Use 
 
 ![ArduLO Paused Screenshot](./.github/screenshots/paused.gif)
 
-Pressing the A button will pause the game. Within the pause menu you can also choose to restart the puzzle.
+Pressing the A button will pause the game. Within the pause menu you can also choose to restart the puzzle or toggle sound on and off.
 
 ![ArduLO Level Done Screenshot](./.github/screenshots/leveldone.gif)
 
