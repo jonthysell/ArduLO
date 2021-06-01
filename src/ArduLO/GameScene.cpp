@@ -71,7 +71,27 @@ SceneId updateGame()
     {
         if (currentGameModeId == GameModeId::LevelComplete)
         {
-            sound.tones(LevelCompleteSound);
+            switch(game.getHalfStars())
+            {
+            case 1:
+                sound.tones(LevelComplete1Sound);
+                break;
+            case 2:
+                sound.tones(LevelComplete2Sound);
+                break;
+            case 3:
+                sound.tones(LevelComplete3Sound);
+                break;
+            case 4:
+                sound.tones(LevelComplete4Sound);
+                break;
+            case 5:
+                sound.tones(LevelComplete5Sound);
+                break;
+            case 6:
+                sound.tones(LevelComplete6Sound);
+                break;
+            }
         }
         else if (currentGameModeId == GameModeId::GameComplete)
         {
@@ -191,6 +211,7 @@ SceneId updateGame()
                 {
                     // Skip to animation end
                     frameCount = LevelCompleteAnimationFrames;
+                    sound.noTone();
                     return SceneId::Game;
                 }
             }
@@ -236,6 +257,7 @@ SceneId updateGame()
             {
                 // Restart game
                 frameCount = 0;
+                sound.noTone();
                 return SceneId::Title;
             }
         }
@@ -461,24 +483,27 @@ void drawGame()
 
         drawHalfStars(drawX, drawY, min(displayHalfStars, (uint8_t)boundedMap(frameCount, 0, LevelCompleteAnimationFrames, 0, MaxHalfStars)));
 
-        // Draw next button
-        drawX = (WIDTH / 4) - (NextBitmapHeight / 2);
-        drawY += starHeight + TextPadding;
-
-        arduboy.drawBitmap(drawX, drawY, NextBitmap, NextBitmapWidth, NextBitmapHeight, WHITE);
-
-        if (selectedIndex == 0)
+        if (frameCount >= LevelCompleteAnimationFrames)
         {
-            arduboy.drawRoundRect(drawX - 3, drawY - 2, NextBitmapWidth + 6, NextBitmapHeight + 4, 1, WHITE);    
-        }
+            // Draw next button
+            drawX = (WIDTH / 4) - (NextBitmapHeight / 2);
+            drawY += starHeight + TextPadding;
 
-        // Draw retry button
-        drawX = (WIDTH - (WIDTH / 4)) - (RetryBitmapWidth / 2);
-        arduboy.drawBitmap(drawX, drawY, RetryBitmap, RetryBitmapWidth, RetryBitmapHeight, WHITE);
+            arduboy.drawBitmap(drawX, drawY, NextBitmap, NextBitmapWidth, NextBitmapHeight, WHITE);
 
-        if (selectedIndex == 1)
-        {
-            arduboy.drawRoundRect(drawX - 3, drawY - 2, RetryBitmapWidth + 6, RetryBitmapHeight + 4, 1, WHITE);    
+            if (selectedIndex == 0)
+            {
+                arduboy.drawRoundRect(drawX - 3, drawY - 2, NextBitmapWidth + 6, NextBitmapHeight + 4, 1, WHITE);    
+            }
+
+            // Draw retry button
+            drawX = (WIDTH - (WIDTH / 4)) - (RetryBitmapWidth / 2);
+            arduboy.drawBitmap(drawX, drawY, RetryBitmap, RetryBitmapWidth, RetryBitmapHeight, WHITE);
+
+            if (selectedIndex == 1)
+            {
+                arduboy.drawRoundRect(drawX - 3, drawY - 2, RetryBitmapWidth + 6, RetryBitmapHeight + 4, 1, WHITE);    
+            }
         }
     }
     else if (currentGameModeId == GameModeId::GameComplete)

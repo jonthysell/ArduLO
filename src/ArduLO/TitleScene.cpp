@@ -44,6 +44,8 @@ SceneId updateTitle()
             {
                 // Skip to animation end
                 frameCount = TitleAnimationFrames;
+                sound.noTone();
+                return SceneId::Title;
             }
             else
             {
@@ -80,7 +82,7 @@ void drawTitle()
 
     arduboy.drawBitmap(drawX, drawY, TitleBitmap, TitleBitmapWidth, TitleBitmapHeight, WHITE);
 
-    if (frameCount > TitleAnimationFrames)
+    if (frameCount >= TitleAnimationFrames)
     {
         // Draw A button
         drawX = (WIDTH / 4) - (LetterABitmapWidth / 2);

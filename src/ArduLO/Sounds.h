@@ -16,7 +16,40 @@ const uint16_t MoveSoundDuration = BaseNoteDuration*2;
 const uint16_t ToggleSound = NOTE_G4;
 const uint16_t ToggleSoundDuration = BaseNoteDuration*2;
 
-const uint16_t LevelCompleteSound[] PROGMEM = {
+const uint16_t LevelComplete1Sound[] PROGMEM = {
+    NOTE_B3,BaseNoteDuration*2,
+    TONES_END
+};
+
+const uint16_t LevelComplete2Sound[] PROGMEM = {
+    NOTE_C4,BaseNoteDuration*2,
+    TONES_END
+};
+
+const uint16_t LevelComplete3Sound[] PROGMEM = {
+    NOTE_C4,BaseNoteDuration*2,
+    NOTE_REST,BaseNoteDuration,
+    NOTE_DS4,BaseNoteDuration*2,
+    TONES_END
+};
+
+const uint16_t LevelComplete4Sound[] PROGMEM = {
+    NOTE_C4,BaseNoteDuration*2,
+    NOTE_REST,BaseNoteDuration,
+    NOTE_E4,BaseNoteDuration*2,
+    TONES_END
+};
+
+const uint16_t LevelComplete5Sound[] PROGMEM = {
+    NOTE_C4,BaseNoteDuration*2,
+    NOTE_REST,BaseNoteDuration,
+    NOTE_E4,BaseNoteDuration*2,
+    NOTE_REST,BaseNoteDuration,
+    NOTE_FS4,BaseNoteDuration*2,
+    TONES_END
+};
+
+const uint16_t LevelComplete6Sound[] PROGMEM = {
     NOTE_C4,BaseNoteDuration*2,
     NOTE_REST,BaseNoteDuration,
     NOTE_E4,BaseNoteDuration*2,
